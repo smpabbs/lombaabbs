@@ -15,6 +15,20 @@ Blueprint lengkap ada di [PLAN.md](PLAN.md).
 Belum termasuk (lihat milestone di PLAN.md): crawler situs (M2), scheduler/reminder (M3),
 inline search (M4), web publik (M5).
 
+## Situs terbit
+
+Versi daring: **https://smpabbs.github.io/lombaabbs/** (repo `smpabbs/lombaabbs`).
+
+Halaman ini dibangun ulang **otomatis dua kali sehari, 08.00 dan 14.00 WIB**, oleh
+GitHub Actions (`.github/workflows/pages.yml`) — jadi tetap segar walaupun laptop
+dalam keadaan mati. Cron GitHub memakai UTC, maka jadwalnya `0 1 * * *` dan
+`0 7 * * *`. Badge `Sisa N hari` ikut dihitung ulang tiap kali situs dibangun,
+dan lomba yang pendaftarannya sudah lewat ditandai **expired** lalu disembunyikan
+di balik tombol *Tampilkan yang sudah tutup*.
+
+Karena `data/` tidak ikut di-commit, CI menyemai basis datanya sendiri dari
+snapshot di `app/web/seed.py`. Tidak ada kredensial Telegram/LLM yang dibutuhkan.
+
 ## Pratinjau web statis (pra-M5)
 
 Untuk melihat isi database tanpa menjalankan bot atau menyentuh Telegram:
