@@ -1,0 +1,58 @@
+name: Bangun & terbitkan situs
+
+# Situs diperbarui otomatis dua kali sehari (WIB) dari GitHub Actions, jadi tetap
+# jalan walaupun laptop pemilik repo sedang mati.
+# WIB = UTC+7, maka 08:00 WIB -> 01:00 UTC dan 14:00 WIB -> 07:00 UTC.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 1 * * *"
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Deploy terbaru yang menang; yang sedang jalan dibiarkan selesai.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Pasang paket
+        run: pip install -e .
+
+      - name: Bangun situs statis
+        env:
+          # Sengaja tidak menyentuh .env / kredensial Telegram: jalur web berdiri
+          # sendiri, hanya butuh snapshot yang ada di app/web/seed.py.
+          DB_PATH: data/infolomba.db
+          MEDIA_DIR: data/media
+        run: python -m app.web
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
